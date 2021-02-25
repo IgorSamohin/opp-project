@@ -1,5 +1,6 @@
-package generator;
+package generator.ship;
 
+import generator.cargo.Cargo;
 import java.util.Date;
 
 

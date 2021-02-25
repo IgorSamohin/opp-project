@@ -1,4 +1,4 @@
-package generator;
+package generator.cargo;
 
 /**
  * Type of cargo on a ship
