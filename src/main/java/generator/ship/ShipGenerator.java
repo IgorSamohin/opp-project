@@ -2,7 +2,6 @@ package generator.ship;
 
 import generator.cargo.Cargo;
 import generator.cargo.CargoType;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Random;
 
@@ -13,25 +12,28 @@ public class ShipGenerator {
     private final int loaderPerformance;
     private final HashSet<String> names = new HashSet<>();
     private Random random = new Random();
+    private int currentTime = 0;
 
     public ShipGenerator(int loaderPerformance) {
         this.loaderPerformance = loaderPerformance;
     }
 
     public Ship generateShip() {
-        Date arrivalDate = generateArrivalDate();
+        int arrivalDate = generateArrivalDate();
         String name = generateName();
         Cargo cargo = generateCargo();
         double unloadingTime = generateUnloadingTime(cargo, loaderPerformance);
 
+        currentTime += unloadingTime;
         return new Ship(arrivalDate, name, cargo, unloadingTime);
     }
 
     /**
      * @return Date of ship arrival
      */
-    private Date generateArrivalDate() {
-        return new Date();
+    private int generateArrivalDate() {
+        currentTime += random.nextInt(30);
+        return currentTime;
     }
 
     /**
@@ -76,5 +78,9 @@ public class ShipGenerator {
      */
     private double generateUnloadingTime(Cargo cargo, int performance) {
         return ((double) cargo.getParams()) / performance;
+    }
+
+    public int getCurrentTime() {
+        return currentTime;
     }
 }
