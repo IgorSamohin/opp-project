@@ -14,7 +14,7 @@ public class Cargo {
 
     /**
      * @param cargoType - type of cargo
-     * @param params - weight or amount of containers
+     * @param params    - weight or amount of containers
      */
     public Cargo(CargoType cargoType, int params) {
         this.cargoType = cargoType;

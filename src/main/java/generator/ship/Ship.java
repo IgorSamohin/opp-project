@@ -2,7 +2,6 @@ package generator.ship;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import generator.cargo.Cargo;
-import java.util.Date;
 import lombok.Data;
 
 
@@ -11,7 +10,8 @@ import lombok.Data;
  */
 @Data
 public class Ship {
-    /** Date in minutes
+    /**
+     * Date in minutes
      * maxValue = 43_200
      */
     @JsonProperty("arrival_date")

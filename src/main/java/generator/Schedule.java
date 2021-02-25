@@ -18,10 +18,10 @@ public class Schedule {
         this.amountOfLoaders = amountOfLoaders;
     }
 
-    public List<Ship> getSchedule(){
+    public List<Ship> getSchedule() {
         List<Ship> schedule = new ArrayList<>();
         ShipGenerator generator = new ShipGenerator(loaderPerformance);
-        while (generator.getCurrentTime() < MAX_MINUTES){
+        while (generator.getCurrentTime() < MAX_MINUTES) {
             schedule.add(generator.generateShip());
         }
         return schedule;
