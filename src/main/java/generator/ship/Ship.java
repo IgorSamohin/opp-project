@@ -16,9 +16,9 @@ public class Ship {
     private final String name;
     private final Cargo cargo;
     @JsonProperty("unloading_time")
-    private final int unloadingTime;
+    private final double unloadingTime;
 
-    public Ship(Date arrivalDate, String name, Cargo cargo, int unloadingTime) {
+    public Ship(Date arrivalDate, String name, Cargo cargo, double unloadingTime) {
         this.arrivalDate = arrivalDate;
         this.name = name;
         this.cargo = cargo;
