@@ -11,14 +11,17 @@ import lombok.Data;
  */
 @Data
 public class Ship {
+    /** Date in minutes
+     * maxValue = 43_200
+     */
     @JsonProperty("arrival_date")
-    private final Date arrivalDate;
+    private final int arrivalDate;
     private final String name;
     private final Cargo cargo;
     @JsonProperty("unloading_time")
     private final double unloadingTime;
 
-    public Ship(Date arrivalDate, String name, Cargo cargo, double unloadingTime) {
+    public Ship(int arrivalDate, String name, Cargo cargo, double unloadingTime) {
         this.arrivalDate = arrivalDate;
         this.name = name;
         this.cargo = cargo;
