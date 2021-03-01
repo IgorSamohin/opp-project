@@ -6,12 +6,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Main class of Service-1. Use to get random schedule on 30 days
+ * Service-1.
+ * Use to get random schedule on 30 days.
  */
 public class Schedule {
     private final int loaderPerformance;
     private final int amountOfLoaders; //todo сделать учет этого поля в расчетах
-    private final static int MAX_MINUTES = 43_200;
+    private final static int MAX_MINUTES = 43_200; //todo потенциально нужно вести 3 разных времени, отвечающих за разные потоки разгрузки, чтобы не было простоев у кранов
 
     public Schedule(int loaderPerformance, int amountOfLoaders) {
         this.loaderPerformance = loaderPerformance;
@@ -25,5 +26,9 @@ public class Schedule {
             schedule.add(generator.generateShip());
         }
         return schedule;
+    }
+
+    private void writeSchedule(String fileName){
+
     }
 }
