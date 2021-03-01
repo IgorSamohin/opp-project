@@ -9,12 +9,12 @@ import java.util.List;
  * Service-1.
  * Use to get random schedule on 30 days.
  */
-public class Schedule {
+public class ScheduleGenerator {
     private final int loaderPerformance;
     private final int amountOfLoaders; //todo сделать учет этого поля в расчетах
     private final static int MAX_MINUTES = 43_200; //todo потенциально нужно вести 3 разных времени, отвечающих за разные потоки разгрузки, чтобы не было простоев у кранов
 
-    public Schedule(int loaderPerformance, int amountOfLoaders) {
+    public ScheduleGenerator(int loaderPerformance, int amountOfLoaders) {
         this.loaderPerformance = loaderPerformance;
         this.amountOfLoaders = amountOfLoaders;
     }
