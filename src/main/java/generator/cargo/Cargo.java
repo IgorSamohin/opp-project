@@ -2,15 +2,17 @@ package generator.cargo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Data class describing cargo on a ship
  */
 @Data
+@NoArgsConstructor
 public class Cargo {
+    private int params;
     @JsonProperty("cargo_type")
-    private final CargoType cargoType;
-    private final int params;
+    private CargoType cargoType;
 
     /**
      * @param cargoType - type of cargo

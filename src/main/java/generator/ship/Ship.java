@@ -3,25 +3,27 @@ package generator.ship;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import generator.cargo.Cargo;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 
 /**
  * Data class. Describe a ship
  */
 @Data
+@NoArgsConstructor
 public class Ship {
+    private String name;
+    private Cargo cargo;
     /**
      * Date in minutes
      * maxValue = 43_200
      */
     @JsonProperty("arrival_date")
-    private final int arrivalDate;
-    private final String name;
-    private final Cargo cargo;
+    private int arrivalDate;
     @JsonProperty("unloading_time")
-    private final double unloadingTime;
+    private double unloadingTime;
 
-    public Ship(int arrivalDate, String name, Cargo cargo, double unloadingTime) {
+    public Ship(String name, Cargo cargo, int arrivalDate, double unloadingTime) {
         this.arrivalDate = arrivalDate;
         this.name = name;
         this.cargo = cargo;

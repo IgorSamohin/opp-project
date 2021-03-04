@@ -25,7 +25,7 @@ public class ShipGenerator {
         double unloadingTime = generateUnloadingTime(cargo, loaderPerformance);
 
         currentTime += unloadingTime;
-        return new Ship(arrivalDate, name, cargo, unloadingTime);
+        return new Ship(name, cargo, arrivalDate, unloadingTime);
     }
 
     /**
