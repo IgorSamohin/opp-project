@@ -25,10 +25,28 @@ public class ScheduleGenerator {
         while (generator.getCurrentTime() < MAX_MINUTES) {
             schedule.add(generator.generateShip());
         }
+        writeSchedule(schedule);
         return schedule;
     }
 
-    private void writeSchedule(String fileName){
+    private void writeSchedule(List<Ship> ships) {//todo сделать из этого нормальную табличку с нормальным формированием времени
+        System.out.println("Current schedule: ");
+        for (Ship ship : ships) {
+            double unloadingTime = ship.getUnloadingTime();
+            int days1 = (int) (unloadingTime / 1440.0);
+            int hours1 = (int) ((unloadingTime - days1 * 1440.0) / 60.0);
+            int minutes1 = (int) (unloadingTime - hours1 * 60 - days1 * 1440);
+            String unloadingTime1 = "" + days1 + ":" + hours1 + ":" + minutes1;
 
+            double unloadingTime2 = ship.getArrivalDate();
+            int days2 = (int) (unloadingTime2 / 1440.0);
+            int hours2 = (int) ((unloadingTime2 - days2 * 1440.0) / 60.0);
+            int minutes2 = (int) (unloadingTime2 - hours2 * 60 - days2 * 1440);
+            String unloadingTime3 = "" + days2 + ":" + hours2 + ":" + minutes2;
+
+
+            System.out.printf("Name: %s, Cargo type: %-9s, Cargo parameters: %-6s, Arrival date: %-8s, Planned unloading time: %-8s \n",
+                    ship.getName(), ship.getCargo().getCargoType(), ship.getCargo().getParams(), unloadingTime3, unloadingTime1);
+        }
     }
 }
