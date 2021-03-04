@@ -29,4 +29,8 @@ public class Ship {
         this.cargo = cargo;
         this.unloadingTime = unloadingTime;
     }
+
+    public void increaseArrivalDate(int time){
+        arrivalDate += time;
+    }
 }
