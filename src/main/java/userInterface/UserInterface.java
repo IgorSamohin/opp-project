@@ -14,6 +14,8 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
+import java.util.concurrent.BrokenBarrierException;
+import simulator.Simulator;
 
 /**
  * Service-2.
@@ -56,7 +58,7 @@ public class UserInterface {
     /**
      * @return a ship read from terminal or error
      */
-    private Ship readShip() throws IOException {
+    private Ship readShip() throws IOException { //todo добавить проверки на правильный формат ввода, на неповторяемость введенного имени
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         System.out.print("Name (String): ");
         String name = reader.readLine();
@@ -102,5 +104,16 @@ public class UserInterface {
         }
 
         writeScheduleInJsonFile(schedule, "src/main/resources/json.json");
+
+        Simulator simulator = new Simulator();
+        try {
+            simulator.run();
+        } catch (IOException | BrokenBarrierException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        for (Ship s : simulator.getReport()) {
+            System.out.println(s);
+        }
     }
 }

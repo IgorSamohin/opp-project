@@ -62,13 +62,13 @@ public class Simulator {
 
         for (int i = 0; i < amountOfLoaders; i++) {
             workers.add(new Worker(arrivedShips, loaderPerformance, currentTime));
+
             loaders.add(new Thread(() -> {
                 int takenWorker = -1;
 
                 while (true) {
 
                     phaser.arriveAndAwaitAdvance();
-
 
                     if ((takenWorker >= 0) && (workers.get(takenWorker).isUnloaded())) {
                         workers.get(takenWorker).release();
@@ -117,7 +117,7 @@ public class Simulator {
         }
 
         for (int i = 0; i < amountOfLoaders; i++) {
-            loaders.get(i).interrupt();
+            loaders.get(i).interrupt();//todo потоки почему-то не гасятся
         }
 
     }
