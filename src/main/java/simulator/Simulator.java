@@ -14,7 +14,6 @@ import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Phaser;
 
-
 /**
  * Service-3.
  * Takes schedule from Service-2, create delays and early arrivals, do the simulation, return data.

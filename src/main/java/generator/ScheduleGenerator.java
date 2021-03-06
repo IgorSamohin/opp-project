@@ -44,7 +44,6 @@ public class ScheduleGenerator {
             int minutes2 = (int) (unloadingTime2 - hours2 * 60 - days2 * 1440);
             String unloadingTime3 = "" + days2 + ":" + hours2 + ":" + minutes2;
 
-
             System.out.printf("Name: %s, Cargo type: %-9s, Cargo parameters: %-6s, Arrival date: %-8s, Planned unloading time: %-8s \n",
                     ship.getName(), ship.getCargo().getCargoType(), ship.getCargo().getParams(), unloadingTime3, unloadingTime1);
         }

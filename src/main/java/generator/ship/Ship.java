@@ -5,7 +5,6 @@ import generator.cargo.Cargo;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 /**
  * Data class. Describe a ship
  */
@@ -31,7 +30,7 @@ public class Ship {
         this.unloadingTime = unloadingTime;
     }
 
-    public void increaseArrivalDate(int time){
+    public void increaseArrivalDate(int time) {
         arrivalDate += time;
     }
 }

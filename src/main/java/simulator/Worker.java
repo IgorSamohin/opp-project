@@ -12,7 +12,6 @@ public class Worker {
     private final AtomicInteger currentParam = new AtomicInteger(0);
     private int currentTime;
 
-
     public Worker(ConcurrentLinkedQueue<Ship> arrivedShips, int loaderPerformance, int currentTime) {
         this.arrivedShips = arrivedShips;
         this.loaderPerformance = loaderPerformance;
