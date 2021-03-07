@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Phaser;
 
@@ -47,7 +46,7 @@ public class Simulator {
     /**
      * Do preparations before simulation beginning
      */
-    public void run() throws IOException, BrokenBarrierException, InterruptedException {
+    public void run() throws IOException, InterruptedException {
         List<Ship> schedule = this.getSchedule();
         List<Ship> actualSchedule = new ArrayList<>(schedule);
 

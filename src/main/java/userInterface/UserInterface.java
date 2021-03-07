@@ -30,7 +30,7 @@ public class UserInterface {
     public UserInterface(int loaderPerformance, int amountOfLoaders) {
         this.loaderPerformance = loaderPerformance;
         this.amountOfLoaders = amountOfLoaders;
-        this.scheduleGenerator = new ScheduleGenerator(loaderPerformance, amountOfLoaders);
+        this.scheduleGenerator = new ScheduleGenerator(loaderPerformance);
     }
 
     /**
@@ -108,7 +108,7 @@ public class UserInterface {
         Simulator simulator = new Simulator();
         try {
             simulator.run();
-        } catch (IOException | BrokenBarrierException | InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
 
