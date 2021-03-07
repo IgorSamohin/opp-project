@@ -9,6 +9,7 @@ import java.util.Random;
  * Use to generate random ship
  */
 public class ShipGenerator {
+    private final static int MAX_MINUTES = 43_200;
     private final int loaderPerformance;
     private final HashSet<String> names = new HashSet<>();
     private Random random = new Random();
@@ -22,7 +23,9 @@ public class ShipGenerator {
         int arrivalDate = generateArrivalDate();
         String name = generateName();
         Cargo cargo = generateCargo();
-        double unloadingTime = generateUnloadingTime(cargo, loaderPerformance);
+        int generatedUnloadingTime = generateUnloadingTime(cargo, loaderPerformance);
+
+        int unloadingTime = ((arrivalDate + generatedUnloadingTime) > MAX_MINUTES) ? MAX_MINUTES : generatedUnloadingTime;
 
         currentTime += unloadingTime;
         return new Ship(name, cargo, arrivalDate, unloadingTime);
@@ -76,8 +79,8 @@ public class ShipGenerator {
      * @param performance performance of a loader (tons(amount) per hour)
      * @return time of ship unloading
      */
-    private double generateUnloadingTime(Cargo cargo, int performance) {
-        return ((double) cargo.getParams()) / performance;
+    private int generateUnloadingTime(Cargo cargo, int performance) {
+        return cargo.getParams() / performance + 1;
     }
 
     public int getCurrentTime() {
