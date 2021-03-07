@@ -28,6 +28,7 @@ public class Simulator {
     private List<Ship> report = new ArrayList<>();
     private ConcurrentLinkedQueue<Ship> arrivedShips = new ConcurrentLinkedQueue<>();
     private int currentTime = 0;
+    private volatile boolean canWork = true;
 
     public List<Ship> getReport() {
         return report;
@@ -103,6 +104,9 @@ public class Simulator {
 
         while (true) {
             phaser.arriveAndAwaitAdvance();
+            if(!canWork){
+                break;
+            }
 
             //check if taken worker empty or unloaded
             if ((takenWorker >= 0) && (workers.get(takenWorker).isUnloaded() || !workers.get(takenWorker).isBusy())) {
@@ -132,6 +136,7 @@ public class Simulator {
      * @param phaser         needs for synchronization between loaders and main thread
      */
     private void startMainCycle(List<Ship> actualSchedule, Phaser phaser) {
+        canWork = true;
         while (currentTime != maxTime) {
             while (!(actualSchedule.isEmpty()) && (actualSchedule.get(0).getArrivalDate() == currentTime)) {
                 arrivedShips.add(actualSchedule.remove(0));
@@ -149,11 +154,13 @@ public class Simulator {
             ++currentTime;
             phaser.arriveAndAwaitAdvance();
         }
+        canWork = false;
+        phaser.arriveAndAwaitAdvance();
     }
 
     private void interruptThreads() {
         for (int i = 0; i < amountOfLoaders; i++) {
-            loaders.get(i).interrupt();//todo потоки почему-то не гасятся
+            loaders.get(i).interrupt();
         }
     }
 
