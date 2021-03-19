@@ -6,7 +6,6 @@ import generator.cargo.CargoType;
 import generator.ship.Ship;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -22,7 +21,7 @@ public class Manager {
     private int amountOfBulkLoaders = 5;
     private int amountOfLiquidLoaders = 5;
     private int amountOfContainersLoaders = 5;
-    private List<Ship> report = new ArrayList<>();
+    private Report report = new Report();
 
 
     public void run() throws IOException, InterruptedException {
@@ -66,9 +65,11 @@ public class Manager {
         });
 
         countDownLatch.await();
-        report.addAll(bulkSimulator.getReport());
-        report.addAll(liquidSimulator.getReport());
-        report.addAll(containerSimulator.getReport());
+
+
+        report.merge(bulkSimulator.getReport(),
+                liquidSimulator.getReport(),
+                containerSimulator.getReport());
         simulators.shutdown();
     }
 
@@ -81,7 +82,9 @@ public class Manager {
         return mapper.readValue(new File("src/main/resources/json.json"), collectionType);
     }
 
-    public List<Ship> getReport() {
+    public Report getReport() {
         return report;
     }
+
+
 }

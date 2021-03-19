@@ -111,7 +111,7 @@ public class UserInterface {
             e.printStackTrace();
         }
 
-        for (Ship s : manager.getReport()) {
+        for (Ship s : manager.getReport().getUnloadingHistory()) {
             System.out.println(s);
         }
     }

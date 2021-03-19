@@ -14,7 +14,7 @@ public class Simulator{
     private final int maxTime = 43_200;
     private List<Thread> loaders = new ArrayList<>();
     private List<Worker> workers = new ArrayList<>();
-    private List<Ship> report = new ArrayList<>();
+    private Report report = new Report();
     private ConcurrentLinkedQueue<Ship> arrivedShips = new ConcurrentLinkedQueue<>();
     private int currentTime = 0;
     private volatile boolean canWork = true;
@@ -28,7 +28,7 @@ public class Simulator{
         this.loaderPerformance = loaderPerformance;
     }
 
-    public List<Ship> getReport() {
+    public Report getReport() {
         return report;
     }
 
@@ -142,7 +142,7 @@ public class Simulator{
             for (int i = 0; i < amountOfLoaders; i++) {
                 Ship ship = workers.get(i).update();
                 if (ship != null) {
-                    report.add(ship);
+                    report.addShip(ship);
                 }
             }
 
