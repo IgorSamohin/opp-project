@@ -2,16 +2,16 @@ package simulator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
-import generator.cargo.CargoType;
 import generator.ship.Ship;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 /**
  * Service-3.
@@ -19,20 +19,27 @@ import java.util.stream.Collectors;
  */
 public class Manager {
     private int loaderPerformance = 100;
-    private int amountOfBulkLoaders = 5;
-    private int amountOfLiquidLoaders = 5;
-    private int amountOfContainersLoaders = 5;
+    private int amountOfBulkLoaders = 1;
+    private int amountOfLiquidLoaders = 1;
+    private int amountOfContainersLoaders = 1;
     private Report report = new Report();
+    private Random random = new Random();
+    private final int MAX_ARRIVE_DELAY = 10_080;
+    private final int MAX_UNLOAD_DELAY = 1440;
+
+    List<Ship> bulkSchedule = new ArrayList<>();
+    List<Ship> liquidSchedule = new ArrayList<>();
+    List<Ship> containerSchedule = new ArrayList<>();
 
 
     public void run() throws IOException, InterruptedException {
         List<Ship> commonSchedule = this.getSchedule();
 
-        List<Ship> bulkSchedule = new ArrayList<>();
-        List<Ship> liquidSchedule = new ArrayList<>();
-        List<Ship> containerSchedule = new ArrayList<>();
+        List<Ship> scheduleWithDelays = new ArrayList<>(commonSchedule);
+        this.makeDelays(scheduleWithDelays);
+        scheduleWithDelays.sort(Comparator.comparingInt(Ship::getArrivalDate));
 
-        for (Ship s : commonSchedule) {
+        for (Ship s : scheduleWithDelays) {
             switch (s.getCargo().getCargoType()) {
                 case BULK -> bulkSchedule.add(s);
                 case LIQUID -> liquidSchedule.add(s);
@@ -63,7 +70,6 @@ public class Manager {
 
         countDownLatch.await();
 
-
         report.merge(bulkSimulator.getReport(),
                 liquidSimulator.getReport(),
                 containerSimulator.getReport());
@@ -77,6 +83,19 @@ public class Manager {
         ObjectMapper mapper = new ObjectMapper();
         CollectionType collectionType = mapper.getTypeFactory().constructCollectionType(List.class, Ship.class);
         return mapper.readValue(new File("src/main/resources/json.json"), collectionType);
+    }
+
+    private void makeDelays(List<Ship> ships) {
+        for (Ship ship : ships) {
+            int arrivalDelay = random.nextInt(MAX_ARRIVE_DELAY * 2) - MAX_ARRIVE_DELAY;
+            if (arrivalDelay < 0) {
+                arrivalDelay = -Math.min(ship.getArrivalDate(), -arrivalDelay);
+            }
+            ship.increaseArrivalDate(arrivalDelay);
+
+            int unloadDelay = random.nextInt(MAX_UNLOAD_DELAY);
+            ship.setUnloadingEndDate(unloadDelay);
+        }
     }
 
     public Report getReport() {

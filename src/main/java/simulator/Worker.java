@@ -11,6 +11,7 @@ public class Worker {
     private final int loaderPerformance;
     private final AtomicInteger currentParam = new AtomicInteger(0);
     private int currentTime;
+    private int unloadingDelay = 0;
 
     public Worker(ConcurrentLinkedQueue<Ship> arrivedShips, int loaderPerformance, int currentTime) {
         this.arrivedShips = arrivedShips;
@@ -41,7 +42,7 @@ public class Worker {
     }
 
     public boolean isUnloaded() {
-        return currentParam.get() < 0;
+        return (currentParam.get() <= 0) && (unloadingDelay <= 0);
     }
 
     public synchronized void release() {
@@ -50,6 +51,10 @@ public class Worker {
 
     public Ship update() {
         Ship retShip = null;
+        if ((currentParam.get() <= 0) && (unloadingDelay > 0)) {
+            --unloadingDelay;
+        }
+
         if (this.isBusy() && this.isUnloaded()) {
             ship.setUnloadingEndDate(currentTime);
             retShip = this.ship;
@@ -58,6 +63,7 @@ public class Worker {
 
         if (!this.isBusy()) {
             this.ship = arrivedShips.poll();
+            unloadingDelay = (this.ship != null) ? this.ship.getUnloadingEndDate() : 0;
             currentParam.set(this.ship != null ? this.ship.getCargo().getParams() : 0);
         }
 

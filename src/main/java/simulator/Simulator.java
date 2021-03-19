@@ -2,9 +2,7 @@ package simulator;
 
 import generator.ship.Ship;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Phaser;
 
@@ -19,11 +17,9 @@ public class Simulator{
     private int currentTime = 0;
     private volatile boolean canWork = true;
     private List<Ship> schedule;
-    private Random random = new Random();
-    private final int maxDelay = 10_080;
 
     public Simulator(List<Ship> schedule, int amountOfLoaders, int loaderPerformance) {
-        this.schedule = new ArrayList<>(schedule);
+        this.schedule = schedule;
         this.amountOfLoaders = amountOfLoaders;
         this.loaderPerformance = loaderPerformance;
     }
@@ -32,31 +28,15 @@ public class Simulator{
         return report;
     }
 
-    private void makeDelays(List<Ship> ships) {
-        for (Ship ship : ships) {
-            int delay = random.nextInt(maxDelay * 2) - maxDelay;
-            if (delay < 0) {
-                delay = -Math.min(ship.getArrivalDate(), -delay);
-            }
-            ship.increaseArrivalDate(delay);
-        }
-    }
-
     /**
      * Do preparations before simulation beginning
      */
     public void run(){
-        List<Ship> actualSchedule = new ArrayList<>(schedule);
-
-        this.makeDelays(actualSchedule);
-
-        actualSchedule.sort(Comparator.comparingInt(Ship::getArrivalDate));
-
         Phaser phaser = new Phaser(amountOfLoaders + 1);
 
         this.startThreads(phaser);
 
-        this.startMainCycle(actualSchedule, phaser);
+        this.startMainCycle(schedule, phaser);
 
         this.interruptThreads();
     }
@@ -124,7 +104,6 @@ public class Simulator{
             phaser.arriveAndAwaitAdvance();
         }
     }
-
 
     /**
      * Main cycle. Manage synchronization, update workers
