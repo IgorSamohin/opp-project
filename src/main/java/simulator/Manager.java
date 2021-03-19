@@ -6,6 +6,7 @@ import generator.cargo.CargoType;
 import generator.ship.Ship;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -27,21 +28,17 @@ public class Manager {
     public void run() throws IOException, InterruptedException {
         List<Ship> commonSchedule = this.getSchedule();
 
-        List<Ship> bulkSchedule = commonSchedule.stream()
-                .filter(e -> e.getCargo()
-                        .getCargoType()
-                        .equals(CargoType.BULK))
-                .collect(Collectors.toList());
-        List<Ship> liquidSchedule = commonSchedule.stream()
-                .filter(e -> e.getCargo()
-                        .getCargoType()
-                        .equals(CargoType.LIQUID))
-                .collect(Collectors.toList());
-        List<Ship> containerSchedule = commonSchedule.stream()
-                .filter(e -> e.getCargo()
-                        .getCargoType()
-                        .equals(CargoType.CONTAINER))
-                .collect(Collectors.toList());
+        List<Ship> bulkSchedule = new ArrayList<>();
+        List<Ship> liquidSchedule = new ArrayList<>();
+        List<Ship> containerSchedule = new ArrayList<>();
+
+        for (Ship s : commonSchedule) {
+            switch (s.getCargo().getCargoType()) {
+                case BULK -> bulkSchedule.add(s);
+                case LIQUID -> liquidSchedule.add(s);
+                case CONTAINER -> containerSchedule.add(s);
+            }
+        }
 
         Simulator bulkSimulator = new Simulator(bulkSchedule, amountOfBulkLoaders, loaderPerformance);
         Simulator liquidSimulator = new Simulator(liquidSchedule, amountOfLiquidLoaders, loaderPerformance);
@@ -85,6 +82,4 @@ public class Manager {
     public Report getReport() {
         return report;
     }
-
-
 }
