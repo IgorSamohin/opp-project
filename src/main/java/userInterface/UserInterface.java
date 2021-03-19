@@ -14,8 +14,7 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
-import java.util.concurrent.BrokenBarrierException;
-import simulator.Simulator;
+import simulator.Manager;
 
 /**
  * Service-2.
@@ -105,14 +104,14 @@ public class UserInterface {
 
         writeScheduleInJsonFile(schedule, "src/main/resources/json.json");
 
-        Simulator simulator = new Simulator();
+        Manager manager = new Manager();
         try {
-            simulator.run();
+            manager.run();
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
 
-        for (Ship s : simulator.getReport()) {
+        for (Ship s : manager.getReport()) {
             System.out.println(s);
         }
     }
