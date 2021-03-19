@@ -3,6 +3,7 @@ package generator;
 import generator.ship.Ship;
 import generator.ship.ShipGenerator;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -11,7 +12,7 @@ import java.util.List;
  */
 public class ScheduleGenerator {
     private final int loaderPerformance;
-    private final static int MAX_MINUTES = 43_200; //todo потенциально нужно вести 3 разных времени, отвечающих за разные потоки разгрузки, чтобы не было простоев у кранов
+    private final static int MAX_MINUTES = 43_200;
 
     public ScheduleGenerator(int loaderPerformance) {
         this.loaderPerformance = loaderPerformance;
@@ -23,6 +24,7 @@ public class ScheduleGenerator {
         while (generator.getCurrentTime() < MAX_MINUTES) {
             schedule.add(generator.generateShip());
         }
+        schedule.sort(Comparator.comparingInt(Ship::getArrivalDate));
         writeSchedule(schedule);
         return schedule;
     }
@@ -42,6 +44,6 @@ public class ScheduleGenerator {
         int days = (int) (time / 1440.0);
         int hours = (int) ((time - days * 1440.0) / 60.0);
         int minutes = (int) (time - hours * 60 - days * 1440);
-        return  "" + days + ":" + hours + ":" + minutes;
+        return "" + days + ":" + hours + ":" + minutes;
     }
 }
