@@ -3,6 +3,7 @@ package simulator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import generator.ship.Ship;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import lombok.Data;
 
@@ -38,5 +39,9 @@ public class Report {
         for (Report r : reports) {
             unloadingHistory.addAll(r.getUnloadingHistory());
         }
+    }
+
+    public void sortByArrivalDate() {
+        unloadingHistory.sort(Comparator.comparingInt(Ship::getArrivalDate));
     }
 }
