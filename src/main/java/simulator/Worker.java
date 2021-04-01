@@ -64,10 +64,14 @@ public class Worker {
         if (!this.isBusy()) {
             this.ship = arrivedShips.poll();
             unloadingDelay = (this.ship != null) ? this.ship.getUnloadingEndDate() : 0;
-            currentParam.set(this.ship != null ? this.ship.getCargo().getParams() : 0);
+            currentParam.set((this.ship != null) ? this.ship.getCargo().getParams() : 0);
         }
 
         ++currentTime;
         return retShip;
+    }
+
+    public Ship getShip() {
+        return ship;
     }
 }

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Phaser;
 
-public class Simulator{
+public class Simulator {
     private int amountOfLoaders;
     private int loaderPerformance;
     private final int maxTime = 43_200;
@@ -31,7 +31,7 @@ public class Simulator{
     /**
      * Do preparations before simulation beginning
      */
-    public void run(){
+    public void run() {
         Phaser phaser = new Phaser(amountOfLoaders + 1);
 
         this.startThreads(phaser);
@@ -132,6 +132,23 @@ public class Simulator{
         }
         canWork = false;
         phaser.arriveAndAwaitAdvance();
+
+        for (int i = 0; i < amountOfLoaders; i++) {
+            Ship ship = workers.get(i).getShip();
+            if (ship != null) {
+                ship.setUnloadingEndDate(-1);
+                report.addShip(ship);
+            }
+        }
+
+        for (Ship ship : arrivedShips) {
+            ship.setUnloadingEndDate(-2);
+            report.addShip(ship);
+        }
+
+        for (Ship ship : actualSchedule) {
+            report.addShip(ship);
+        }
     }
 
     private void interruptThreads() {
