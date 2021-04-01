@@ -35,7 +35,8 @@ public class ScheduleGenerator {
             String unloadingTime = formatDate(ship.getUnloadingTime());
             String arrivalDate = formatDate(ship.getArrivalDate());
 
-            System.out.printf("Name: %s, Cargo type: %-9s, Cargo parameters: %-6s, Arrival date: %-8s, Planned unloading time: %-8s \n",
+            System.out.printf("Name: %s, Cargo type: %-9s, Cargo parameters: %-6s, Arrival date: %-8s, Planned " +
+                            "unloading time: %-8s %n",
                     ship.getName(), ship.getCargo().getCargoType(), ship.getCargo().getParams(), arrivalDate, unloadingTime);
         }
     }

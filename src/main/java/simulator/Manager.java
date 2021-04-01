@@ -18,10 +18,10 @@ import java.util.concurrent.Executors;
  * Takes schedule from Service-2, create delays and early arrivals, do the simulation, return data.
  */
 public class Manager {
-    private int loaderPerformance = 100;
-    private int amountOfBulkLoaders = 1;
-    private int amountOfLiquidLoaders = 1;
-    private int amountOfContainersLoaders = 1;
+    private int loaderPerformance = 10;
+    private int amountOfBulkLoaders = 5;
+    private int amountOfLiquidLoaders = 5;
+    private int amountOfContainersLoaders = 5;
     private Report report = new Report();
     private Random random = new Random();
     private final int MAX_ARRIVE_DELAY = 10_080;
