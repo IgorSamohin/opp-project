@@ -26,6 +26,11 @@ public class Manager {
     private Random random = new Random();
     private final int MAX_ARRIVE_DELAY = 10_080;
     private final int MAX_UNLOAD_DELAY = 1440;
+    private final int ONE_HOUR_BILL = 100;
+
+    private int fine = 0;
+
+    List<Ship> commonSchedule;
 
     List<Ship> bulkSchedule = new ArrayList<>();
     List<Ship> liquidSchedule = new ArrayList<>();
@@ -33,7 +38,7 @@ public class Manager {
 
 
     public void run() throws IOException, InterruptedException {
-        List<Ship> commonSchedule = this.getSchedule();
+        commonSchedule = this.getSchedule();
 
         List<Ship> scheduleWithDelays = new ArrayList<>(commonSchedule);
         this.makeDelays(scheduleWithDelays);
@@ -51,19 +56,40 @@ public class Manager {
         Simulator liquidSimulator = new Simulator(liquidSchedule, amountOfLiquidLoaders, loaderPerformance);
         Simulator containerSimulator = new Simulator(containerSchedule, amountOfContainersLoaders, loaderPerformance);
 
-        ExecutorService simulators = Executors.newFixedThreadPool(3);
+        ExecutorService simulators = Executors.newCachedThreadPool();
 
         CountDownLatch countDownLatch = new CountDownLatch(3);
+        CountDownLatch countDownLatch1 = new CountDownLatch(3);
 
         simulators.execute(() -> {
+            countDownLatch1.countDown();
+            try {
+                countDownLatch1.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             bulkSimulator.run();
             countDownLatch.countDown();
         });
+
         simulators.execute(() -> {
+            countDownLatch1.countDown();
+            try {
+                countDownLatch1.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             liquidSimulator.run();
             countDownLatch.countDown();
         });
+
         simulators.execute(() -> {
+            countDownLatch1.countDown();
+            try {
+                countDownLatch1.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             containerSimulator.run();
             countDownLatch.countDown();
         });
@@ -73,6 +99,8 @@ public class Manager {
         report.merge(bulkSimulator.getReport(),
                 liquidSimulator.getReport(),
                 containerSimulator.getReport());
+        calculateFine(report);
+
         simulators.shutdown();
     }
 
@@ -101,4 +129,36 @@ public class Manager {
     public Report getReport() {
         return report;
     }
+
+    /**
+     * Calculate total fine for a given report
+     *
+     * @param report the report
+     */
+    private void calculateFine(Report report) {
+        for (Ship ship : report.getUnloadingHistory()) {
+            Ship shipInSchedule = null;
+            for (Ship s : commonSchedule) {
+                if (s.getName().equals(ship.getName())) {
+                    shipInSchedule = s;
+                    break;
+                }
+            }
+
+            if (shipInSchedule == null) {
+                continue;
+            }
+
+            int delayInHour = 0;
+            if (shipInSchedule.getArrivalDate() <= ship.getArrivalDate()) {
+                //arrived with delay
+                delayInHour = (ship.getUnloadingEndDate() - ship.getArrivalDate() - ship.getUnloadingTime()) / 60;
+            } else {
+                //arrived in time
+                delayInHour = (ship.getUnloadingEndDate() - shipInSchedule.getArrivalDate() - ship.getUnloadingTime()) / 60;
+            }
+            fine += (delayInHour > 0) ? delayInHour * ONE_HOUR_BILL : 0;
+        }
+    }
+
 }
