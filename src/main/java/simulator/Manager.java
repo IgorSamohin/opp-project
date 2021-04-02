@@ -12,6 +12,7 @@ import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Phaser;
 
 /**
  * Service-3.
@@ -30,11 +31,14 @@ public class Manager {
 
     private int fine = 0;
 
-    List<Ship> commonSchedule;
+    private List<Ship> commonSchedule;
 
-    List<Ship> bulkSchedule = new ArrayList<>();
-    List<Ship> liquidSchedule = new ArrayList<>();
-    List<Ship> containerSchedule = new ArrayList<>();
+    private List<Ship> bulkSchedule = new ArrayList<>();
+    private List<Ship> liquidSchedule = new ArrayList<>();
+    private List<Ship> containerSchedule = new ArrayList<>();
+
+    private Phaser phaser = new Phaser(3);
+    private ExecutorService simulators = Executors.newFixedThreadPool(3);
 
 
     public void run() throws IOException, InterruptedException {
@@ -56,52 +60,30 @@ public class Manager {
         Simulator liquidSimulator = new Simulator(liquidSchedule, amountOfLiquidLoaders, loaderPerformance);
         Simulator containerSimulator = new Simulator(containerSchedule, amountOfContainersLoaders, loaderPerformance);
 
-        ExecutorService simulators = Executors.newCachedThreadPool();
-
         CountDownLatch countDownLatch = new CountDownLatch(3);
-        CountDownLatch countDownLatch1 = new CountDownLatch(3);
 
-        simulators.execute(() -> {
-            countDownLatch1.countDown();
-            try {
-                countDownLatch1.await();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            bulkSimulator.run();
-            countDownLatch.countDown();
-        });
-
-        simulators.execute(() -> {
-            countDownLatch1.countDown();
-            try {
-                countDownLatch1.await();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            liquidSimulator.run();
-            countDownLatch.countDown();
-        });
-
-        simulators.execute(() -> {
-            countDownLatch1.countDown();
-            try {
-                countDownLatch1.await();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            containerSimulator.run();
-            countDownLatch.countDown();
-        });
+        startSimulation(bulkSimulator, countDownLatch);
+        startSimulation(liquidSimulator, countDownLatch);
+        startSimulation(containerSimulator, countDownLatch);
 
         countDownLatch.await();
 
-        report.merge(bulkSimulator.getReport(),
-                liquidSimulator.getReport(),
-                containerSimulator.getReport());
+        Report b = bulkSimulator.getReport();
+        Report l = liquidSimulator.getReport();
+        Report c = containerSimulator.getReport();
+
+        report.merge(b, l, c);
         calculateFine(report);
 
         simulators.shutdown();
+    }
+
+    private void startSimulation(Simulator simulator, CountDownLatch cdl) {
+        simulators.execute(() -> {
+            phaser.arriveAndAwaitAdvance();
+            simulator.run();
+            cdl.countDown();
+        });
     }
 
     /**
