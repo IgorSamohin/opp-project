@@ -13,6 +13,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
+import lombok.Getter;
 
 /**
  * Service-3.
@@ -23,6 +24,7 @@ public class Manager {
     private int amountOfBulkLoaders = 5;
     private int amountOfLiquidLoaders = 5;
     private int amountOfContainersLoaders = 5;
+    @Getter
     private Report report = new Report();
     private Random random = new Random();
     private final int MAX_ARRIVE_DELAY = 10_080;
@@ -106,10 +108,6 @@ public class Manager {
             int unloadDelay = random.nextInt(MAX_UNLOAD_DELAY);
             ship.setUnloadingEndDate(unloadDelay);
         }
-    }
-
-    public Report getReport() {
-        return report;
     }
 
     /**

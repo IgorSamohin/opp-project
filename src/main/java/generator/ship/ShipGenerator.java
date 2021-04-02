@@ -11,7 +11,7 @@ import java.util.Random;
  * Use to generate random ship
  */
 public class ShipGenerator {
-    private final static int MAX_MINUTES = 43_200;
+    private static final int MAX_MINUTES = 43_200;
     private final int loaderPerformance;
     private final HashSet<String> names = new HashSet<>();
     private Random random = new Random();
@@ -91,7 +91,7 @@ public class ShipGenerator {
             list.add(CargoType.CONTAINER);
         }
 
-        if (list.size() == 0) {
+        if (list.isEmpty()) {
             throw new RuntimeException("All possible ships were generated");
         }
 

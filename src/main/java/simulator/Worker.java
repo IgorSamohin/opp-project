@@ -3,8 +3,10 @@ package simulator;
 import generator.ship.Ship;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
+import lombok.Getter;
 
 public class Worker {
+    @Getter
     private Ship ship = null;
     private final ConcurrentLinkedQueue<Ship> arrivedShips;
     private volatile int amountOfLoaders = 0;
@@ -69,9 +71,5 @@ public class Worker {
 
         ++currentTime;
         return retShip;
-    }
-
-    public Ship getShip() {
-        return ship;
     }
 }

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Phaser;
+import lombok.Getter;
 
 public class Simulator {
     private int amountOfLoaders;
@@ -12,6 +13,7 @@ public class Simulator {
     private final int maxTime = 43_200;
     private List<Thread> loaders = new ArrayList<>();
     private List<Worker> workers = new ArrayList<>();
+    @Getter
     private Report report = new Report();
     private ConcurrentLinkedQueue<Ship> arrivedShips = new ConcurrentLinkedQueue<>();
     private int currentTime = 0;
@@ -22,10 +24,6 @@ public class Simulator {
         this.schedule = schedule;
         this.amountOfLoaders = amountOfLoaders;
         this.loaderPerformance = loaderPerformance;
-    }
-
-    public Report getReport() {
-        return report;
     }
 
     /**
