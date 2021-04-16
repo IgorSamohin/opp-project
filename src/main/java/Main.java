@@ -7,7 +7,7 @@ import userInterface.UserInterface;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        UserInterface userInterface = new UserInterface(100, 1);
+        UserInterface userInterface = new UserInterface(100, 5);
         userInterface.run();
 
         ObjectMapper mapper = new ObjectMapper();

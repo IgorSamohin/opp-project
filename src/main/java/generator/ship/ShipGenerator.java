@@ -11,10 +11,10 @@ import java.util.Random;
  * Use to generate random ship
  */
 public class ShipGenerator {
-    private static final int MAX_MINUTES = 43_200;
+    private final int MAX_MINUTES = 43_200;
     private final int loaderPerformance;
     private final HashSet<String> names = new HashSet<>();
-    private Random random = new Random();
+    private final Random random = new Random();
     private int currentBulkTime = 0;
     private int currentLiquidTime = 0;
     private int currentContainerTime = 0;

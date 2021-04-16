@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class ScheduleGenerator {
     private final int loaderPerformance;
-    private final static int MAX_MINUTES = 43_200;
+    private final int MAX_MINUTES = 43_200;
 
     public ScheduleGenerator(int loaderPerformance) {
         this.loaderPerformance = loaderPerformance;
@@ -29,7 +29,7 @@ public class ScheduleGenerator {
         return schedule;
     }
 
-    private void writeSchedule(List<Ship> ships) {//todo сделать из этого нормальную табличку с нормальным формированием времени
+    private void writeSchedule(List<Ship> ships) {
         System.out.println("Current schedule: ");
         for (Ship ship : ships) {
             String unloadingTime = formatDate(ship.getUnloadingTime());
@@ -37,7 +37,11 @@ public class ScheduleGenerator {
 
             System.out.printf("Name: %s, Cargo type: %-9s, Cargo parameters: %-6s, Arrival date: %-8s, Planned " +
                             "unloading time: %-8s %n",
-                    ship.getName(), ship.getCargo().getCargoType(), ship.getCargo().getParams(), arrivalDate, unloadingTime);
+                    ship.getName(),
+                    ship.getCargo().getCargoType(),
+                    ship.getCargo().getParams(),
+                    arrivalDate,
+                    unloadingTime);
         }
     }
 
