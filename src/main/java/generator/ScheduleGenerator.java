@@ -24,7 +24,7 @@ public class ScheduleGenerator {
         while (generator.getCurrentTime() < MAX_MINUTES) {
             schedule.add(generator.generateShip());
         }
-        schedule.sort(Comparator.comparingInt(Ship::getArrivalDate));
+        schedule.sort(Comparator.comparingInt(Ship::getPlannedArrivalDate));
         writeSchedule(schedule);
         return schedule;
     }
@@ -33,7 +33,7 @@ public class ScheduleGenerator {
         System.out.println("Current schedule: ");
         for (Ship ship : ships) {
             String unloadingTime = formatDate(ship.getUnloadingTime());
-            String arrivalDate = formatDate(ship.getArrivalDate());
+            String arrivalDate = formatDate(ship.getPlannedArrivalDate());
 
             System.out.printf("Name: %s, Cargo type: %-9s, Cargo parameters: %-6s, Arrival date: %-8s, Planned " +
                             "unloading time: %-8s %n",
