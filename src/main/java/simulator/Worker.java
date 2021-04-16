@@ -1,21 +1,21 @@
 package simulator;
 
 import generator.ship.Ship;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.Getter;
 
 public class Worker {
     @Getter
     private Ship ship = null;
-    private final ConcurrentLinkedQueue<Ship> arrivedShips;
-    private volatile int amountOfLoaders = 0;
+    private final Queue<Ship> arrivedShips;
+    private final AtomicInteger amountOfLoaders = new AtomicInteger(0);
     private final int loaderPerformance;
     private final AtomicInteger currentParam = new AtomicInteger(0);
     private int currentTime;
     private int unloadingDelay = 0;
 
-    public Worker(ConcurrentLinkedQueue<Ship> arrivedShips, int loaderPerformance, int currentTime) {
+    public Worker(Queue<Ship> arrivedShips, int loaderPerformance, int currentTime) {
         this.arrivedShips = arrivedShips;
         this.loaderPerformance = loaderPerformance;
         this.currentTime = currentTime;
@@ -25,16 +25,23 @@ public class Worker {
         return ship != null;
     }
 
-    public synchronized boolean takePlace() {
-        if ((isBusy()) && (amountOfLoaders < 2)) {
-            ++amountOfLoaders;
-            return true;
-        }
+    public boolean takePlace() {
+        int n = -1;
+        int res = -1;
+        do {
+            n = amountOfLoaders.get();
 
-        return false;
+            if ((isBusy()) && (n < 2)) {
+                res = n + 1;
+            } else {
+                return false;
+            }
+        } while (amountOfLoaders.compareAndSet(n, res));
+
+        return res != -1;
     }
 
-    public void work() {
+    public void work()  {
         int param = -1;
         int res = -1;
         do {
@@ -47,8 +54,13 @@ public class Worker {
         return (currentParam.get() <= 0) && (unloadingDelay <= 0);
     }
 
-    public synchronized void release() {
-        --amountOfLoaders;
+    public void release() {
+        int n = -1;
+        int res = -1;
+        do {
+            n = amountOfLoaders.get();
+            res = n - 1;
+        } while (!amountOfLoaders.compareAndSet(n, res));
     }
 
     public Ship update() {
