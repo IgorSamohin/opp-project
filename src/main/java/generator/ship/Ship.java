@@ -3,13 +3,15 @@ package generator.ship;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import generator.cargo.Cargo;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * Data class. Describe a ship
  */
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Ship {
@@ -25,6 +27,8 @@ public class Ship {
     private int actualArrivalDate;
     @JsonProperty("unloading_time")
     private int unloadingTime;
+    @JsonProperty("unloading_start_date")
+    private int unloadingStartDate = 0;
     @JsonProperty("unloading_end_date")
     private int unloadingEndDate = 0;
 
@@ -33,6 +37,16 @@ public class Ship {
         this.name = name;
         this.cargo = cargo;
         this.unloadingTime = unloadingTime;
+    }
+
+    public Ship(Ship ship) {
+        this.name = ship.getName();
+        this.cargo = new Cargo(ship.getCargo().getCargoType(), ship.getCargo().getParams());
+        this.plannedArrivalDate = ship.getPlannedArrivalDate();
+        this.actualArrivalDate = ship.getActualArrivalDate();
+        this.unloadingTime = ship.getUnloadingTime();
+        this.unloadingStartDate = ship.getUnloadingStartDate();
+        this.unloadingEndDate = ship.getUnloadingEndDate();
     }
 
     public void increaseArrivalDate(int time) {

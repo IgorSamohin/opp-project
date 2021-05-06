@@ -20,18 +20,16 @@ import lombok.Getter;
  * Takes schedule from Service-2, create delays and early arrivals, do the simulation, return data.
  */
 public class Manager {
-    private int loaderPerformance = 10;
-    private int amountOfBulkLoaders = 5;
-    private int amountOfLiquidLoaders = 5;
-    private int amountOfContainersLoaders = 5;
+    private int loaderPerformance = 5000;
+    private int amountOfBulkLoaders = 1;
+    private int amountOfLiquidLoaders = 1;
+    private int amountOfContainersLoaders = 1;
     @Getter
     private Report report = new Report();
     private Random random = new Random();
     private final int MAX_ARRIVE_DELAY = 10_080;
     private final int MAX_UNLOAD_DELAY = 1440;
-    private final int ONE_HOUR_BILL = 100;
-
-    private int fine = 0;
+    private final int MAX_TIME = 43_200;
 
     private List<Ship> commonSchedule;
 
@@ -45,12 +43,10 @@ public class Manager {
 
     public void run() throws IOException, InterruptedException {
         commonSchedule = this.getSchedule();
+        this.makeDelays(commonSchedule);
+        commonSchedule.sort(Comparator.comparingInt(Ship::getActualArrivalDate));
 
-        List<Ship> scheduleWithDelays = new ArrayList<>(commonSchedule);
-        this.makeDelays(scheduleWithDelays);
-        scheduleWithDelays.sort(Comparator.comparingInt(Ship::getArrivalDate));
-
-        for (Ship s : scheduleWithDelays) {
+        for (Ship s : commonSchedule) {
             switch (s.getCargo().getCargoType()) {
                 case BULK -> bulkSchedule.add(s);
                 case LIQUID -> liquidSchedule.add(s);
@@ -64,9 +60,9 @@ public class Manager {
 
         CountDownLatch countDownLatch = new CountDownLatch(3);
 
-        startSimulation(bulkSimulator, countDownLatch);
-        startSimulation(liquidSimulator, countDownLatch);
-        startSimulation(containerSimulator, countDownLatch);
+        startSimulation(bulkSimulator, amountOfBulkLoaders, countDownLatch);
+        startSimulation(liquidSimulator, amountOfLiquidLoaders, countDownLatch);
+        startSimulation(containerSimulator, amountOfContainersLoaders, countDownLatch);
 
         countDownLatch.await();
 
@@ -75,12 +71,13 @@ public class Manager {
         Report c = containerSimulator.getReport();
 
         report.merge(b, l, c);
-        calculateFine(report);
+        System.out.println(report.getFine());
 
         simulators.shutdown();
     }
 
-    private void startSimulation(Simulator simulator, CountDownLatch cdl) {
+    private void startSimulation(Simulator simulator, int amountOfLoaders, CountDownLatch cdl) {
+        simulator.setAmountOfLoaders(amountOfLoaders);
         simulators.execute(() -> {
             phaser.arriveAndAwaitAdvance();
             simulator.run();
@@ -101,44 +98,21 @@ public class Manager {
         for (Ship ship : ships) {
             int arrivalDelay = random.nextInt(MAX_ARRIVE_DELAY * 2) - MAX_ARRIVE_DELAY;
             if (arrivalDelay < 0) {
-                arrivalDelay = -Math.min(ship.getArrivalDate(), -arrivalDelay);
+                arrivalDelay = -Math.min(ship.getPlannedArrivalDate(), -arrivalDelay);
             }
-            ship.increaseArrivalDate(arrivalDelay);
+
+            if (ship.getPlannedArrivalDate() + arrivalDelay + ship.getUnloadingTime() >= MAX_TIME) {
+                ship.setActualArrivalDate(MAX_TIME - ship.getPlannedArrivalDate() - ship.getUnloadingTime());
+            } else {
+                ship.setActualArrivalDate(ship.getPlannedArrivalDate() + arrivalDelay);
+            }
 
             int unloadDelay = random.nextInt(MAX_UNLOAD_DELAY);
-            ship.setUnloadingEndDate(unloadDelay);
-        }
-    }
-
-    /**
-     * Calculate total fine for a given report
-     *
-     * @param report the report
-     */
-    private void calculateFine(Report report) {
-        for (Ship ship : report.getUnloadingHistory()) {
-            Ship shipInSchedule = null;
-            for (Ship s : commonSchedule) {
-                if (s.getName().equals(ship.getName())) {
-                    shipInSchedule = s;
-                    break;
-                }
-            }
-
-            if (shipInSchedule == null) {
-                continue;
-            }
-
-            int delayInHour = 0;
-            if (shipInSchedule.getArrivalDate() <= ship.getArrivalDate()) {
-                //arrived with delay
-                delayInHour = (ship.getUnloadingEndDate() - ship.getArrivalDate() - ship.getUnloadingTime()) / 60;
+            if (ship.getActualArrivalDate() + ship.getUnloadingTime() + unloadDelay >= MAX_TIME) {
+                ship.setUnloadingEndDate(MAX_TIME - ship.getActualArrivalDate() - ship.getUnloadingTime());
             } else {
-                //arrived in time
-                delayInHour = (ship.getUnloadingEndDate() - shipInSchedule.getArrivalDate() - ship.getUnloadingTime()) / 60;
+                ship.setUnloadingEndDate(unloadDelay);
             }
-            fine += (delayInHour > 0) ? delayInHour * ONE_HOUR_BILL : 0;
         }
     }
-
 }

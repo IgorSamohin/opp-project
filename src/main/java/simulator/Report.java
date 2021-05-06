@@ -5,43 +5,93 @@ import generator.ship.Ship;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class Report {
+    private static final int ONE_HOUR_BILL = 100;
+    private static final int ONE_LOADER_COST = 30_0000;
+    private final int MAX_TIME = 43_200;
     @JsonProperty("unloading_history")
-    List<Ship> unloadingHistory = new ArrayList<>();
+    private List<Ship> unloadingHistory = new ArrayList<>();
 
     @JsonProperty("ship_amount")
-    int shipAmount;
+    private int shipAmount = 0;
 
     @JsonProperty("avg_queue_size")
-    int avgQueueSize;
+    private double avgQueueSize = 0;
 
     @JsonProperty("avg_waiting_time")
-    int avgWaitingTime;
+    private double avgWaitingTime = 0;
 
     @JsonProperty("max_delay")
-    int maxDelay;
+    private int maxDelay = 0;
 
     @JsonProperty("avg_delay")
-    int avgDelay;
-    int tax;
+    private double avgDelay = 0;
+    private int fine = 0;
 
     @JsonProperty("requestedLoadersAmount")
-    int requestedLoadersAmount;
+    private int requestedLoadersAmount;
 
     public void addShip(Ship ship) {
-        unloadingHistory.add(ship);
+        unloadingHistory.add(new Ship(ship));
     }
 
     public void merge(Report... reports) {
         for (Report r : reports) {
             unloadingHistory.addAll(r.getUnloadingHistory());
+            fine += r.getFine();
         }
     }
 
+    public void calculateStats() {
+        shipAmount = unloadingHistory.size();
+        int maxDelayTemp = 0;
+        for (Ship ship : unloadingHistory) {
+            double delay = ship.getUnloadingEndDate() - ship.getUnloadingStartDate() - ship.getUnloadingTime();
+            if (delay > maxDelayTemp) {
+                maxDelayTemp = this.maxDelay;
+                this.maxDelay = ship.getUnloadingEndDate() - ship.getUnloadingStartDate() - ship.getUnloadingTime();
+            }
+
+            avgDelay += (delay > 0) ? delay / shipAmount : 0;
+            avgWaitingTime += ((double) ship.getUnloadingStartDate() - (double) ship.getActualArrivalDate()) / shipAmount;
+        }
+        calculateFine();
+    }
+
     public void sortByArrivalDate() {
-        unloadingHistory.sort(Comparator.comparingInt(Ship::getArrivalDate));
+        unloadingHistory.sort(Comparator.comparingInt(Ship::getPlannedArrivalDate));
+    }
+
+    /**
+     * Reset calculated fine and calculate new total fine for report
+     *
+     * @return calculated fine
+     */
+    private int calculateFine() {
+        fine = 0;
+        for (Ship ship : unloadingHistory) {
+            int delayInHour = 0;
+
+            if (ship.getUnloadingEndDate() < 0) {
+                fine += ONE_LOADER_COST;
+                continue;
+            }
+
+            if (ship.getPlannedArrivalDate() <= ship.getActualArrivalDate()) {
+                //arrived with delay
+                delayInHour = (ship.getUnloadingEndDate() - ship.getActualArrivalDate() - ship.getUnloadingTime()) / 60;
+            } else {
+                //arrived in time
+                delayInHour =
+                        (ship.getUnloadingEndDate() - ship.getPlannedArrivalDate() - ship.getUnloadingTime()) / 60;
+            }
+            fine += (delayInHour > 0) ? delayInHour * ONE_HOUR_BILL : 0;
+        }
+        return fine;
     }
 }

@@ -98,9 +98,9 @@ public class ShipGenerator {
         int n = random.nextInt(list.size());
 
         int amount = switch (list.get(n)) {
-            case CONTAINER -> random.nextInt(100_000);
-            case BULK -> random.nextInt(200_000);
-            case LIQUID -> random.nextInt(500_000);
+            case CONTAINER -> random.nextInt(20_000);
+            case BULK -> random.nextInt(100_000);
+            case LIQUID -> random.nextInt(300_000);
         };
 
         return new Cargo(list.get(n), amount);

@@ -1,13 +1,15 @@
 package generator.cargo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * Data class describing cargo on a ship
  */
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 public class Cargo {
     private int params;
