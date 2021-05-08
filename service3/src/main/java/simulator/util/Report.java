@@ -1,12 +1,12 @@
-package simulator;
+package simulator.util;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import generator.ship.Ship;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
+import simulator.ship.Ship;
 
 @Getter
 @Setter
@@ -67,6 +67,8 @@ public class Report {
         unloadingHistory.sort(Comparator.comparingInt(Ship::getPlannedArrivalDate));
     }
 
+
+    public int count = 0;
     /**
      * Reset calculated fine and calculate new total fine for report
      *
@@ -78,6 +80,7 @@ public class Report {
             int delayInHour = 0;
 
             if (ship.getUnloadingEndDate() < 0) {
+                count++;
                 fine += ONE_LOADER_COST;
                 continue;
             }

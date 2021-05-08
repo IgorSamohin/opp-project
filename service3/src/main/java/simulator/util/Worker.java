@@ -1,9 +1,9 @@
-package simulator;
+package simulator.util;
 
-import generator.ship.Ship;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.Getter;
+import simulator.ship.Ship;
 
 public class Worker {
     @Getter

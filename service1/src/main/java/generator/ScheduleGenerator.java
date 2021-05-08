@@ -1,35 +1,46 @@
 package generator;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import generator.ship.Ship;
 import generator.ship.ShipGenerator;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 /**
  * Service-1.
  * Use to get random schedule on 30 days.
  */
+@Repository
 public class ScheduleGenerator {
-    private final int loaderPerformance;
-    private final int MAX_MINUTES = 43_200;
+    ScheduleGeneratorConfig config;
 
-    public ScheduleGenerator(int loaderPerformance) {
-        this.loaderPerformance = loaderPerformance;
+    public ScheduleGenerator(@Autowired ScheduleGeneratorConfig config) {
+        this.config = config;
     }
 
     public List<Ship> getSchedule() {
         List<Ship> schedule = new ArrayList<>();
-        ShipGenerator generator = new ShipGenerator(loaderPerformance);
-        while (generator.getCurrentTime() < MAX_MINUTES) {
+        ShipGenerator generator = new ShipGenerator(config.getLoaderPerformance());
+        while (generator.getCurrentTime() < config.getMaxMinutes()) {
             schedule.add(generator.generateShip());
         }
         schedule.sort(Comparator.comparingInt(Ship::getPlannedArrivalDate));
-        writeSchedule(schedule);
+        logSchedule(schedule);
         return schedule;
     }
 
-    private void writeSchedule(List<Ship> ships) {
+    public String getSerializedSchedule() throws JsonProcessingException {
+        List<Ship> ships = getSchedule();
+
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(ships);
+    }
+
+    private void logSchedule(List<Ship> ships) {
         System.out.println("Current schedule: ");
         for (Ship ship : ships) {
             String unloadingTime = formatDate(ship.getUnloadingTime());

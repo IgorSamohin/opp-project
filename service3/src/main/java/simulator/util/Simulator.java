@@ -1,11 +1,11 @@
-package simulator;
+package simulator.util;
 
-import generator.ship.Ship;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Phaser;
 import lombok.Setter;
+import simulator.ship.Ship;
 
 public class Simulator {
     @Setter
@@ -52,6 +52,16 @@ public class Simulator {
 
             int newFine = report.getFine() + (amountOfLoaders - 1) * ONE_LOADER_COAST;
             int oldFine = oldReport.getFine() + (amountOfLoaders - 2) * ONE_LOADER_COAST;
+            System.out.printf("%s   N: %-4s,  count: %-2s   newFine: %-8s,   oldFine %-8s\n",
+                    Thread.currentThread().getName(),
+                    amountOfLoaders,
+                    report.count,
+                    newFine,
+                    oldFine
+                    );
+            /*TODO: Симуляция проходит очень долго из-за необходимости синхронизировать много потоков.
+            *  Потенциальное решение: подбор количества кранов бинарным поиском
+            */
             if (!notAllServed && (newFine > oldFine)) {
                 if (oldReport.getUnloadingHistory().isEmpty()) {
                     oldReport = report;

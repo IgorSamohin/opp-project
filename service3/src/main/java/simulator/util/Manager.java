@@ -1,8 +1,7 @@
-package simulator;
+package simulator.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
-import generator.ship.Ship;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,6 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
 import lombok.Getter;
+import simulator.ship.Ship;
 
 /**
  * Service-3.
@@ -40,9 +40,12 @@ public class Manager {
     private Phaser phaser = new Phaser(3);
     private ExecutorService simulators = Executors.newFixedThreadPool(3);
 
+    public Manager(List<Ship> ships){
+        this.commonSchedule = ships;
+    }
 
     public void run() throws IOException, InterruptedException {
-        commonSchedule = this.getSchedule();
+//        commonSchedule = this.getSchedule();
         this.makeDelays(commonSchedule);
         commonSchedule.sort(Comparator.comparingInt(Ship::getActualArrivalDate));
 

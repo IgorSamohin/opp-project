@@ -1,5 +1,5 @@
 import com.fasterxml.jackson.databind.ObjectMapper;
-import generator.ship.Ship;
+import common.ship.Ship;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
