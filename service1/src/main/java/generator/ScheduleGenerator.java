@@ -4,9 +4,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import generator.ship.Ship;
 import generator.ship.ShipGenerator;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Comparator;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.TimeZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -17,6 +23,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ScheduleGenerator {
     ScheduleGeneratorConfig config;
+    private final Logger logger = LoggerFactory.getLogger(ScheduleGenerator.class);
 
     public ScheduleGenerator(@Autowired ScheduleGeneratorConfig config) {
         this.config = config;
@@ -41,25 +48,32 @@ public class ScheduleGenerator {
     }
 
     private void logSchedule(List<Ship> ships) {
-        System.out.println("Current schedule: ");
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("Current schedule: \n");
         for (Ship ship : ships) {
             String unloadingTime = formatDate(ship.getUnloadingTime());
             String arrivalDate = formatDate(ship.getPlannedArrivalDate());
 
-            System.out.printf("Name: %s, Cargo type: %-9s, Cargo parameters: %-6s, Arrival date: %-8s, Planned " +
-                            "unloading time: %-8s %n",
+            stringBuilder.append(String.format("Name: %s, Cargo type: %-9s, Cargo parameters: %-6s, Arrival date: " +
+                            "%-8s, Planned unloading time: %-8s %n",
                     ship.getName(),
                     ship.getCargo().getCargoType(),
                     ship.getCargo().getParams(),
                     arrivalDate,
-                    unloadingTime);
+                    unloadingTime));
         }
+        logger.info("{}", stringBuilder);
     }
 
     private String formatDate(double time) {
-        int days = (int) (time / 1440.0);
-        int hours = (int) ((time - days * 1440.0) / 60.0);
-        int minutes = (int) (time - hours * 60 - days * 1440);
+        Calendar cal = new GregorianCalendar();
+        cal.setTimeZone(TimeZone.getTimeZone(ZoneId.of("UTC")));
+        cal.setTimeInMillis((long) time * config.getMillisInMinute());
+
+        int days = cal.get(Calendar.DAY_OF_MONTH) - 1;
+        int hours = cal.get(Calendar.HOUR_OF_DAY);
+        int minutes = cal.get(Calendar.MINUTE);
+
         return "" + days + ":" + hours + ":" + minutes;
     }
 }

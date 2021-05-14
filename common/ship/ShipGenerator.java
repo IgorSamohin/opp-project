@@ -1,24 +1,23 @@
-package generator.ship;
+package common.ship;
 
-import java.util.Comparator;
+import common.cargo.Cargo;
+import common.cargo.CargoType;
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
+import java.util.List;
 import java.util.Random;
-
-import generator.cargo.Cargo;
-import generator.cargo.CargoType;
-import generator.cargo.CargosMapFactory;
 
 /**
  * Use to generate random ship
  */
 public class ShipGenerator {
-    private static final int MAX_MINUTES = 43_200;
+    private final int MAX_MINUTES = 43_200;
     private final int loaderPerformance;
     private final HashSet<String> names = new HashSet<>();
     private final Random random = new Random();
-    private final Map<CargoType, Integer> cargosMap = new CargosMapFactory().createCargosMap();
+    private int currentBulkTime = 0;
+    private int currentLiquidTime = 0;
+    private int currentContainerTime = 0;
 
     public ShipGenerator(int loaderPerformance) {
         this.loaderPerformance = loaderPerformance;
@@ -36,9 +35,21 @@ public class ShipGenerator {
      * @return Date of ship arrival
      */
     private int generateArrivalDate(CargoType type) {
-        Integer time = cargosMap.get(type);
-        time += random.nextInt(30);
-        cargosMap.put(type, time);
+        int time = 0;
+        switch (type) {
+            case BULK -> {
+                currentBulkTime += random.nextInt(30);
+                time = currentBulkTime;
+            }
+            case LIQUID -> {
+                currentLiquidTime += random.nextInt(30);
+                time = currentLiquidTime;
+            }
+            case CONTAINER -> {
+                currentContainerTime += random.nextInt(30);
+                time = currentContainerTime;
+            }
+        }
         return time;
     }
 
@@ -66,23 +77,33 @@ public class ShipGenerator {
      * @throws RuntimeException if all three times ended
      */
     private Cargo generateCargo() throws RuntimeException {
-        int n = -1;
-        CargoType[] cargoTypes = null;
-        do {
-            if (n != -1) {
-                cargosMap.remove(cargoTypes[n]);
-            }
+        List<CargoType> list = new ArrayList<>();
 
-            if (cargosMap.isEmpty()) {
-                throw new RuntimeException("All possible ships were generated");
-            }
+        if (currentBulkTime < MAX_MINUTES) {
+            list.add(CargoType.BULK);
+        }
 
-            cargoTypes = cargosMap.keySet().toArray(new CargoType[0]);
-            n = random.nextInt(cargoTypes.length);
-        } while (cargosMap.get(cargoTypes[n]) >= MAX_MINUTES);
+        if (currentLiquidTime < MAX_MINUTES) {
+            list.add(CargoType.LIQUID);
+        }
 
-        int amount = random.nextInt(cargoTypes[n].getAmount());
-        return new Cargo(cargoTypes[n], amount);
+        if (currentContainerTime < MAX_MINUTES) {
+            list.add(CargoType.CONTAINER);
+        }
+
+        if (list.isEmpty()) {
+            throw new RuntimeException("All possible ships were generated");
+        }
+
+        int n = random.nextInt(list.size());
+
+        int amount = switch (list.get(n)) {
+            case CONTAINER -> random.nextInt(20_000);
+            case BULK -> random.nextInt(100_000);
+            case LIQUID -> random.nextInt(300_000);
+        };
+
+        return new Cargo(list.get(n), amount);
     }
 
     /**
@@ -96,15 +117,16 @@ public class ShipGenerator {
         int totalTime = arrivalDate + generatedUnloadingTime;
         int unloadingTime = (totalTime > MAX_MINUTES) ? (MAX_MINUTES - arrivalDate) : generatedUnloadingTime;
 
-        Integer time = cargosMap.get(cargo.getCargoType());
-        time += unloadingTime;
-        cargosMap.put(cargo.getCargoType(), time);
+        switch (cargo.getCargoType()) {
+            case BULK -> currentBulkTime += unloadingTime;
+            case LIQUID -> currentLiquidTime += unloadingTime;
+            case CONTAINER -> currentContainerTime += unloadingTime;
+        }
 
         return unloadingTime;
     }
 
     public int getCurrentTime() {
-        Optional<Integer> min = cargosMap.values().stream().min(Comparator.comparing(Integer::valueOf));
-        return min.orElse(MAX_MINUTES);
+        return Math.min(currentBulkTime, Math.min(currentLiquidTime, currentContainerTime));
     }
 }
