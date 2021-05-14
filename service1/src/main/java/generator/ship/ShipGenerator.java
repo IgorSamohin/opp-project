@@ -1,27 +1,30 @@
 package generator.ship;
 
+import generator.cargo.Cargo;
+import generator.cargo.CargoType;
+import generator.cargo.CargosMapFactory;
+
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 
-import generator.cargo.Cargo;
-import generator.cargo.CargoType;
-import generator.cargo.CargosMapFactory;
-
 /**
  * Use to generate random ship
  */
 public class ShipGenerator {
-    private static final int MAX_MINUTES = 43_200;
+    private final int maxMinutes;
+    private final int maxIntervalBetweenArrival;
     private final int loaderPerformance;
     private final HashSet<String> names = new HashSet<>();
     private final Random random = new Random();
     private final Map<CargoType, Integer> cargosMap = new CargosMapFactory().createCargosMap();
 
-    public ShipGenerator(int loaderPerformance) {
+    public ShipGenerator(int loaderPerformance, int maxMinutes, int maxIntervalBetweenArrival) {
         this.loaderPerformance = loaderPerformance;
+        this.maxMinutes = maxMinutes;
+        this.maxIntervalBetweenArrival = maxIntervalBetweenArrival;
     }
 
     public Ship generateShip() throws RuntimeException {
@@ -37,7 +40,7 @@ public class ShipGenerator {
      */
     private int generateArrivalDate(CargoType type) {
         Integer time = cargosMap.get(type);
-        time += random.nextInt(30);
+        time += random.nextInt(maxIntervalBetweenArrival);
         cargosMap.put(type, time);
         return time;
     }
@@ -79,10 +82,10 @@ public class ShipGenerator {
 
             cargoTypes = cargosMap.keySet().toArray(new CargoType[0]);
             n = random.nextInt(cargoTypes.length);
-        } while (cargosMap.get(cargoTypes[n]) >= MAX_MINUTES);
+        } while (cargosMap.get(cargoTypes[n]) >= maxMinutes);
 
         int amount = random.nextInt(cargoTypes[n].getAmount());
-        return new Cargo(cargoTypes[n], amount);
+        return new Cargo(amount, cargoTypes[n]);
     }
 
     /**
@@ -94,7 +97,7 @@ public class ShipGenerator {
     private int generateUnloadingTime(Cargo cargo, int performance, int arrivalDate) {
         int generatedUnloadingTime = cargo.getParams() / performance + 1;
         int totalTime = arrivalDate + generatedUnloadingTime;
-        int unloadingTime = (totalTime > MAX_MINUTES) ? (MAX_MINUTES - arrivalDate) : generatedUnloadingTime;
+        int unloadingTime = (totalTime > maxMinutes) ? (maxMinutes - arrivalDate) : generatedUnloadingTime;
 
         Integer time = cargosMap.get(cargo.getCargoType());
         time += unloadingTime;
@@ -105,6 +108,6 @@ public class ShipGenerator {
 
     public int getCurrentTime() {
         Optional<Integer> min = cargosMap.values().stream().min(Comparator.comparing(Integer::valueOf));
-        return min.orElse(MAX_MINUTES);
+        return min.orElse(maxMinutes);
     }
 }

@@ -8,13 +8,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class GeneratorUI {
-
     @Autowired
     private ScheduleGenerator generator;
 
     @GetMapping("/schedule")
     @ResponseBody
-    public String getSchedule(){
+    public String getSchedule() {
         try {
             return generator.getSerializedSchedule();
         } catch (JsonProcessingException e) {

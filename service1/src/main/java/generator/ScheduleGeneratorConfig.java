@@ -13,4 +13,5 @@ public class ScheduleGeneratorConfig {
     private int loaderPerformance;
     private int maxMinutes;
     private long millisInMinute;
+    private int maxIntervalBetweenArrival;
 }

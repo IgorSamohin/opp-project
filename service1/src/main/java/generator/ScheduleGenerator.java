@@ -4,6 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import generator.ship.Ship;
 import generator.ship.ShipGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -11,10 +16,6 @@ import java.util.Comparator;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
 
 /**
  * Service-1.
@@ -31,7 +32,10 @@ public class ScheduleGenerator {
 
     public List<Ship> getSchedule() {
         List<Ship> schedule = new ArrayList<>();
-        ShipGenerator generator = new ShipGenerator(config.getLoaderPerformance());
+        ShipGenerator generator = new ShipGenerator(config.getLoaderPerformance(),
+                config.getMaxMinutes(),
+                config.getMaxIntervalBetweenArrival());
+
         while (generator.getCurrentTime() < config.getMaxMinutes()) {
             schedule.add(generator.generateShip());
         }
