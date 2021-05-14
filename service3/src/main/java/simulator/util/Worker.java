@@ -2,6 +2,7 @@ package simulator.util;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import lombok.Getter;
 import simulator.ship.Ship;
 

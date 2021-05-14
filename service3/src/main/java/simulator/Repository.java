@@ -1,7 +1,7 @@
 package simulator;
 
-
 import java.util.List;
+
 import simulator.ship.Ship;
 
 @org.springframework.stereotype.Repository

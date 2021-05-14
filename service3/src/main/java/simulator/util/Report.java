@@ -1,9 +1,11 @@
 package simulator.util;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+
 import lombok.Getter;
 import lombok.Setter;
 import simulator.ship.Ship;
@@ -69,6 +71,7 @@ public class Report {
 
 
     public int count = 0;
+
     /**
      * Reset calculated fine and calculate new total fine for report
      *

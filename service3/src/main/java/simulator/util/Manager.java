@@ -2,6 +2,7 @@ package simulator.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
+
 import lombok.Getter;
 import simulator.ship.Ship;
 
@@ -40,7 +42,7 @@ public class Manager {
     private Phaser phaser = new Phaser(3);
     private ExecutorService simulators = Executors.newFixedThreadPool(3);
 
-    public Manager(List<Ship> ships){
+    public Manager(List<Ship> ships) {
         this.commonSchedule = ships;
     }
 

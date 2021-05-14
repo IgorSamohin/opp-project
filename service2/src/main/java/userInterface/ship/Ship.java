@@ -41,15 +41,11 @@ public class Ship {
 
     public Ship(Ship ship) {
         this.name = ship.getName();
-        this.cargo = new Cargo(ship.getCargo().getCargoType(), ship.getCargo().getParams());
+        this.cargo = new Cargo(ship.getCargo().getParams(), ship.getCargo().getCargoType());
         this.plannedArrivalDate = ship.getPlannedArrivalDate();
         this.actualArrivalDate = ship.getActualArrivalDate();
         this.unloadingTime = ship.getUnloadingTime();
         this.unloadingStartDate = ship.getUnloadingStartDate();
         this.unloadingEndDate = ship.getUnloadingEndDate();
-    }
-
-    public void increaseArrivalDate(int time) {
-        plannedArrivalDate += time;
     }
 }
