@@ -38,14 +38,4 @@ public class Ship {
         this.cargo = cargo;
         this.unloadingTime = unloadingTime;
     }
-
-    public Ship(Ship ship) {
-        this.name = ship.getName();
-        this.cargo = new Cargo(ship.getCargo().getParams(), ship.getCargo().getCargoType());
-        this.plannedArrivalDate = ship.getPlannedArrivalDate();
-        this.actualArrivalDate = ship.getActualArrivalDate();
-        this.unloadingTime = ship.getUnloadingTime();
-        this.unloadingStartDate = ship.getUnloadingStartDate();
-        this.unloadingEndDate = ship.getUnloadingEndDate();
-    }
 }

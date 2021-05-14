@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import simulator.util.Manager;
 import simulator.util.Report;
 
-import java.io.IOException;
+import java.util.List;
 
 @Controller
 public class SimulatorUI {
@@ -17,17 +17,17 @@ public class SimulatorUI {
 
     @GetMapping("/report")
     @ResponseBody
-    public Report getReport(@RequestParam(value = "filename") String filename) {
+    public List<Report> getReport(@RequestParam(value = "filename") String filename) {
         System.out.println(filename);
 
         Manager manager = new Manager(repository.getSchedule());
         try {
             manager.run();
-        } catch (IOException | InterruptedException e) {
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        return manager.getReport();
+        return manager.getReports();
     }
 
 

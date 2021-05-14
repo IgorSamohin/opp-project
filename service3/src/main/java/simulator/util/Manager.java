@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -15,6 +16,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
 
 import lombok.Getter;
+import simulator.cargo.CargoType;
 import simulator.ship.Ship;
 
 /**
@@ -22,67 +24,42 @@ import simulator.ship.Ship;
  * Takes schedule from Service-2, create delays and early arrivals, do the simulation, return data.
  */
 public class Manager {
-    private int loaderPerformance = 5000;
-    private int amountOfBulkLoaders = 1;
-    private int amountOfLiquidLoaders = 1;
-    private int amountOfContainersLoaders = 1;
+    private ManagerConfig config = new ManagerConfig();
     @Getter
-    private Report report = new Report();
-    private Random random = new Random();
-    private final int MAX_ARRIVE_DELAY = 10_080;
-    private final int MAX_UNLOAD_DELAY = 1440;
-    private final int MAX_TIME = 43_200;
-
-    private List<Ship> commonSchedule;
-
-    private List<Ship> bulkSchedule = new ArrayList<>();
-    private List<Ship> liquidSchedule = new ArrayList<>();
-    private List<Ship> containerSchedule = new ArrayList<>();
-
-    private Phaser phaser = new Phaser(3);
-    private ExecutorService simulators = Executors.newFixedThreadPool(3);
+    private final List<Report> reports = new ArrayList<>();
+    private final Random random = new Random();
+    private final List<Ship> commonSchedule;
+    private final Phaser phaser;
+    private final ExecutorService simulators;
 
     public Manager(List<Ship> ships) {
         this.commonSchedule = ships;
+        phaser = new Phaser(config.getTypesAmount());
+        simulators  = Executors.newFixedThreadPool(config.getTypesAmount());
     }
 
-    public void run() throws IOException, InterruptedException {
-//        commonSchedule = this.getSchedule();
+    public void run() throws InterruptedException {
         this.makeDelays(commonSchedule);
         commonSchedule.sort(Comparator.comparingInt(Ship::getActualArrivalDate));
-
-        for (Ship s : commonSchedule) {
-            switch (s.getCargo().getCargoType()) {
-                case BULK -> bulkSchedule.add(s);
-                case LIQUID -> liquidSchedule.add(s);
-                case CONTAINER -> containerSchedule.add(s);
-            }
-        }
-
-        Simulator bulkSimulator = new Simulator(bulkSchedule, amountOfBulkLoaders, loaderPerformance);
-        Simulator liquidSimulator = new Simulator(liquidSchedule, amountOfLiquidLoaders, loaderPerformance);
-        Simulator containerSimulator = new Simulator(containerSchedule, amountOfContainersLoaders, loaderPerformance);
+        Map<CargoType, Simulator> simulatorsMap = new SimulatorsFactory().createSimulators(commonSchedule,
+                1, config.getLoaderPerformance());
 
         CountDownLatch countDownLatch = new CountDownLatch(3);
 
-        startSimulation(bulkSimulator, amountOfBulkLoaders, countDownLatch);
-        startSimulation(liquidSimulator, amountOfLiquidLoaders, countDownLatch);
-        startSimulation(containerSimulator, amountOfContainersLoaders, countDownLatch);
+        for (Simulator s : simulatorsMap.values()) {
+            startSimulation(s, countDownLatch);
+        }
 
         countDownLatch.await();
 
-        Report b = bulkSimulator.getReport();
-        Report l = liquidSimulator.getReport();
-        Report c = containerSimulator.getReport();
+        for (Simulator s : simulatorsMap.values()) {
+            reports.add(s.getReport());
+        }
 
-        report.merge(b, l, c);
-        System.out.println(report.getFine());
-
-        simulators.shutdown();
+        this.simulators.shutdown();
     }
 
-    private void startSimulation(Simulator simulator, int amountOfLoaders, CountDownLatch cdl) {
-        simulator.setAmountOfLoaders(amountOfLoaders);
+    private void startSimulation(Simulator simulator, CountDownLatch cdl) {
         simulators.execute(() -> {
             phaser.arriveAndAwaitAdvance();
             simulator.run();
@@ -101,20 +78,20 @@ public class Manager {
 
     private void makeDelays(List<Ship> ships) {
         for (Ship ship : ships) {
-            int arrivalDelay = random.nextInt(MAX_ARRIVE_DELAY * 2) - MAX_ARRIVE_DELAY;
+            int arrivalDelay = random.nextInt(config.getMaxArriveDelay() * 2) - config.getMaxArriveDelay();
             if (arrivalDelay < 0) {
                 arrivalDelay = -Math.min(ship.getPlannedArrivalDate(), -arrivalDelay);
             }
 
-            if (ship.getPlannedArrivalDate() + arrivalDelay + ship.getUnloadingTime() >= MAX_TIME) {
-                ship.setActualArrivalDate(MAX_TIME - ship.getPlannedArrivalDate() - ship.getUnloadingTime());
+            if (ship.getPlannedArrivalDate() + arrivalDelay + ship.getUnloadingTime() >= config.getMaxTime()) {
+                ship.setActualArrivalDate(config.getMaxTime() - ship.getPlannedArrivalDate() - ship.getUnloadingTime());
             } else {
                 ship.setActualArrivalDate(ship.getPlannedArrivalDate() + arrivalDelay);
             }
 
-            int unloadDelay = random.nextInt(MAX_UNLOAD_DELAY);
-            if (ship.getActualArrivalDate() + ship.getUnloadingTime() + unloadDelay >= MAX_TIME) {
-                ship.setUnloadingEndDate(MAX_TIME - ship.getActualArrivalDate() - ship.getUnloadingTime());
+            int unloadDelay = random.nextInt(config.getMaxUnloadDelay());
+            if (ship.getActualArrivalDate() + ship.getUnloadingTime() + unloadDelay >= config.getMaxTime()) {
+                ship.setUnloadingEndDate(config.getMaxTime() - ship.getActualArrivalDate() - ship.getUnloadingTime());
             } else {
                 ship.setUnloadingEndDate(unloadDelay);
             }

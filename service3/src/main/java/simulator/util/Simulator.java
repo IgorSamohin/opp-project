@@ -5,11 +5,9 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Phaser;
 
-import lombok.Setter;
 import simulator.ship.Ship;
 
 public class Simulator {
-    @Setter
     private int amountOfLoaders;
     private final int loaderPerformance;
     private final int MAX_TIME = 43_200;
