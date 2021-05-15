@@ -80,9 +80,11 @@ public class Simulator {
      * @return id of worker which will be taken by current thread
      */
     private int takeWorker() {
+        int displacement = (int) (Thread.currentThread().getId() % (amountOfLoaders / 2 + 1));
         for (int j = 0; j < amountOfLoaders / 2 + 1; j++) {
-            if (workers.get(j).takePlace()) {
-                return j;
+            int index = (j + displacement) % (amountOfLoaders / 2 + 1);
+            if (workers.get(index).takePlace()) {
+                return index;
             }
         }
         return -1;

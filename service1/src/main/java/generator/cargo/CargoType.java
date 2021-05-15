@@ -6,9 +6,9 @@ import lombok.Getter;
  * Type of cargo on a ship
  */
 public enum CargoType {
-    BULK(20_000),
+    BULK(50_000),
     LIQUID(100_000),
-    CONTAINER(300_000);
+    CONTAINER(200_000);
 
     @Getter
     private final int amount;

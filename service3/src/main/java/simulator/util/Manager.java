@@ -78,6 +78,10 @@ public class Manager {
 
     private void makeDelays(List<Ship> ships) {
         for (Ship ship : ships) {
+            if(random.nextBoolean()){//50% на то, что задержки не будет
+               continue;
+            }
+
             int arrivalDelay = random.nextInt(config.getMaxArriveDelay() * 2) - config.getMaxArriveDelay();
             if (arrivalDelay < 0) {
                 arrivalDelay = -Math.min(ship.getPlannedArrivalDate(), -arrivalDelay);

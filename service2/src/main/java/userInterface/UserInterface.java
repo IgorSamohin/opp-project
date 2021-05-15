@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 /**
  * Service-2.
@@ -35,10 +36,11 @@ public class UserInterface {
      */
     @GetMapping("/start")
     @ResponseBody
-    public List<Ship> startWork() {
-        ships = repository.getSchedule();
-        String report = repository.getReport("json.json");
-        return ships;
+    public String startWork() {
+        String fileName = repository.getSchedule();
+        repository.getReport(fileName);
+        while(!repository.haveResults()){}
+        return repository.readFromFile("report.json");
     }
 
     /**
@@ -48,6 +50,7 @@ public class UserInterface {
      */
     @PostMapping("/results")
     public void getResults(@RequestParam String report) {
+        repository.saveReport(report);
         System.out.println(report);
     }
 
@@ -58,8 +61,12 @@ public class UserInterface {
      */
     @GetMapping("/schedule")
     @ResponseBody
-    public List<Ship> getData(@RequestParam(value = "filename") String filename) {
-        return ships;
+    public String getData(@RequestParam(value = "filename") String filename) {
+        if(!repository.hasFile(filename)){
+            return "";
+        }
+
+        return repository.getSchedule();
     }
 
     /**
@@ -104,39 +111,4 @@ public class UserInterface {
 
         return new Ship(name, new Cargo(params, type), date, time);
     }
-
-//    public void run() throws JsonProcessingException {
-//        Scanner in = new Scanner(System.in);
-//        List<Ship> schedule = this.getSchedule();
-//
-//        System.out.println("Schedule was generated.");
-//        while (true) {
-//            System.out.println("Do you want to enter data? (N|y)");
-//            String command = in.nextLine();
-//            if (command.equals("y") || command.equals("Y")) {
-//                System.out.println("Enter data in format: ");
-//                try {
-//                    schedule.add(readShip());
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            } else {
-//                break;
-//            }
-//        }
-//
-//        writeScheduleInJsonFile(schedule, "src/main/resources/json.json");
-//
-//        Manager manager = new Manager();
-//        try {
-//            manager.run();
-//        } catch (IOException | InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//
-//        List<Ship> unloadingHistory = manager.getReport().getUnloadingHistory();
-//        for (Ship s : unloadingHistory) {
-//            System.out.println(s);
-//        }
-//    }
 }

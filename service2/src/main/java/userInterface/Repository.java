@@ -1,13 +1,14 @@
 package userInterface;
 
-import java.util.List;
-
 import org.springframework.stereotype.Component;
-import userInterface.ship.Ship;
+
+import java.util.concurrent.FutureTask;
 
 @Component
 public interface Repository {
-    List<Ship> getSchedule();
+    String getSchedule();
 
-    String getReport(String s);
+    void saveReport(String s);
+
+    String getReport(String fileName);
 }

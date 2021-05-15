@@ -32,6 +32,11 @@ public class ShipGenerator {
         Cargo cargo = generateCargo();
         int arrivalDate = generateArrivalDate(cargo.getCargoType());
         int unloadingTime = generateUnloadingTime(cargo, loaderPerformance, arrivalDate);
+
+        Integer integer = cargosMap.get(cargo.getCargoType());
+        integer += unloadingTime;
+        cargosMap.put(cargo.getCargoType(), integer);
+
         return new Ship(name, cargo, arrivalDate, unloadingTime);
     }
 

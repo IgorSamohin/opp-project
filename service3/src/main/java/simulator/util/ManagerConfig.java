@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(value = "manager")
 public class ManagerConfig {
-    private int loaderPerformance = 10000;
+    private int loaderPerformance = 5000;
     private int amountOfBulkLoaders = 1;
     private int amountOfLiquidLoaders = 1;
     private int amountOfContainersLoaders = 1;

@@ -15,7 +15,9 @@ import userInterface.cargo.Cargo;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Ship {
+    @JsonProperty("name")
     private String name;
+    @JsonProperty("cargo")
     private Cargo cargo;
     /**
      * Date in minutes
@@ -37,15 +39,5 @@ public class Ship {
         this.name = name;
         this.cargo = cargo;
         this.unloadingTime = unloadingTime;
-    }
-
-    public Ship(Ship ship) {
-        this.name = ship.getName();
-        this.cargo = new Cargo(ship.getCargo().getParams(), ship.getCargo().getCargoType());
-        this.plannedArrivalDate = ship.getPlannedArrivalDate();
-        this.actualArrivalDate = ship.getActualArrivalDate();
-        this.unloadingTime = ship.getUnloadingTime();
-        this.unloadingStartDate = ship.getUnloadingStartDate();
-        this.unloadingEndDate = ship.getUnloadingEndDate();
     }
 }
