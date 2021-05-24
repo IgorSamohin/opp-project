@@ -1,5 +1,6 @@
 package simulator;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +18,7 @@ public class SimulatorUI {
 
     @GetMapping("/report")
     @ResponseBody
-    public List<Report> getReport(@RequestParam(value = "filename") String filename) {
+    public List<Report> getReport(@RequestParam(value = "filename") String filename) throws JsonProcessingException {
         System.out.println(filename);
 
         Manager manager = new Manager(repository.getSchedule());
@@ -27,8 +28,7 @@ public class SimulatorUI {
             e.printStackTrace();
         }
 
+        repository.sendReport(manager.getReports());
         return manager.getReports();
     }
-
-
 }

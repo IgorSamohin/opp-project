@@ -1,5 +1,6 @@
 package simulator.util;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
@@ -13,11 +14,18 @@ import simulator.ship.Ship;
 @Getter
 @Setter
 public class Report {
+    @JsonIgnore
     private static final int ONE_HOUR_BILL = 100;
+    @JsonIgnore
     private static final int ONE_LOADER_COST = 30_0000;
-    private final int MAX_TIME = 43_200;
-    @JsonProperty("unloading_history")
+    @JsonIgnore
+    private static final int MAX_TIME = 43_200;
+
+    @JsonIgnore
     private List<Ship> unloadingHistory = new ArrayList<>();
+//
+//    @JsonProperty("unloading_history")
+//    private List<Ship> unloadingHistory = new ArrayList<>();
 
     @JsonProperty("ship_amount")
     private int shipAmount = 0;
@@ -69,8 +77,8 @@ public class Report {
         unloadingHistory.sort(Comparator.comparingInt(Ship::getPlannedArrivalDate));
     }
 
-
-    public int count = 0;
+    @JsonIgnore
+    public int count = 0; //debug variable
 
     /**
      * Reset calculated fine and calculate new total fine for report

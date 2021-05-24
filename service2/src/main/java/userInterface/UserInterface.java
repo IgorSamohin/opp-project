@@ -1,11 +1,11 @@
 package userInterface;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import userInterface.cargo.Cargo;
@@ -13,13 +13,10 @@ import userInterface.cargo.CargoType;
 import userInterface.ship.Ship;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 
 /**
  * Service-2.
@@ -29,18 +26,15 @@ import java.util.Optional;
 public class UserInterface {
     @Autowired
     RepositoryImpl repository;
-    List<Ship> ships;
 
     /**
      * Entry point
      */
     @GetMapping("/start")
-    @ResponseBody
-    public String startWork() {
+    public String startWork() throws IOException {
         String fileName = repository.getSchedule();
-        repository.getReport(fileName);
-        while(!repository.haveResults()){}
-        return repository.readFromFile("report.json");
+        repository.notify(fileName);
+        return "redirect:/reports";
     }
 
     /**
@@ -49,9 +43,28 @@ public class UserInterface {
      * @param report - results
      */
     @PostMapping("/results")
-    public void getResults(@RequestParam String report) {
+    @ResponseBody
+    public String getResults(@RequestBody String report,
+                             @RequestParam(name = "filename") String filename) throws IOException {
         repository.saveReport(report);
         System.out.println(report);
+        return "ok";//todo
+    }
+
+    /**
+     * Shows report stored in standard file
+     * @return
+     */
+    @GetMapping("/reports")
+    @ResponseBody
+    public String showResults() throws IOException {
+        List<Report> reports = repository.getReport();
+        StringBuilder stringBuilder = new StringBuilder();
+//        for (Report r : reports) {
+//            r.setUnloadingHistory(null);
+//        }
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(reports);
     }
 
     /**
@@ -61,33 +74,18 @@ public class UserInterface {
      */
     @GetMapping("/schedule")
     @ResponseBody
-    public String getData(@RequestParam(value = "filename") String filename) {
-        if(!repository.hasFile(filename)){
-            return "";
+    public String getData(@RequestParam(value = "filename") String filename) throws IOException {
+        if (!repository.hasFile(filename)) {
+            return "error";//todo
         }
 
-        return repository.getSchedule();
-    }
-
-    /**
-     * Transform schedule to json objects and writes it to a file
-     */
-    private void writeScheduleInJsonFile(List<Ship> ships, String fileName) throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        String jsonSchedule = mapper.writeValueAsString(ships);
-        File file = new File(fileName);
-
-        try (FileWriter writer = new FileWriter(file)) {
-            writer.write(jsonSchedule);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+        return repository.readFromFile(filename);
     }
 
     /**
      * @return a ship read from terminal or error
      */
-    private Ship readShip() throws IOException { //todo добавить проверки на правильный формат ввода, на неповторяемость введенного имени
+    private Ship readShip() throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         System.out.print("Name (String): ");
         String name = reader.readLine();
