@@ -2,6 +2,7 @@ package userInterface;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,11 +49,12 @@ public class UserInterface {
                              @RequestParam(name = "filename") String filename) throws IOException {
         repository.saveReport(report);
         System.out.println(report);
-        return "ok";//todo
+        return HttpStatus.OK.toString();
     }
 
     /**
      * Shows report stored in standard file
+     *
      * @return
      */
     @GetMapping("/reports")
@@ -76,15 +78,16 @@ public class UserInterface {
     @ResponseBody
     public String getData(@RequestParam(value = "filename") String filename) throws IOException {
         if (!repository.hasFile(filename)) {
-            return "error";//todo
+            return HttpStatus.NOT_FOUND.toString();
         }
 
-        return repository.readFromFile(filename);
+        return repository.getScheduleFrom(filename);
     }
 
     /**
      * @return a ship read from terminal or error
      */
+    @Deprecated
     private Ship readShip() throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         System.out.print("Name (String): ");

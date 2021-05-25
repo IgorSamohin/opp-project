@@ -3,6 +3,8 @@ package simulator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -17,13 +19,14 @@ import java.util.List;
 public class RepositoryImpl implements Repository {
     private static final String SERVICE_TWO_SCHEDULE_URL = "http://localhost:8082/schedule?filename=json.json";
     private static final String SERVICE_TWO_RESULT_URL = "http://localhost:8082/results?filename=report.json";
+    private final Logger logger = LoggerFactory.getLogger(RepositoryImpl.class);
 
     @Autowired
     RestTemplate template;
 
     public List<Ship> getSchedule() {
         String s = template.getForObject(SERVICE_TWO_SCHEDULE_URL, String.class);
-        System.out.println(s);
+        logger.info(s);
         ObjectMapper mapper = new ObjectMapper();
         CollectionType collectionType = mapper.getTypeFactory().constructCollectionType(List.class, Ship.class);
         try {

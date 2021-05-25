@@ -2,6 +2,7 @@ package userInterface;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -40,7 +41,7 @@ public class RepositoryImpl implements Repository {
     @Override
     public String notify(String fileName) {
         template.getForObject(String.format(SERVICE_THREE_URL, SCHEDULE_FILE_NAME), String.class);
-        return "ok";
+        return HttpStatus.OK.toString();
     }
 
     @Override
@@ -54,9 +55,14 @@ public class RepositoryImpl implements Repository {
         return getReport(REPORT_FILE_NAME);
     }
 
-    public String readFromFile(String fileName) throws IOException {
+    @Override
+    public String getScheduleFrom(String filename) throws IOException {
+        return readFromFile(filename);
+    }
+
+    private String readFromFile(String fileName) throws IOException {
         if (!Files.exists(Path.of(fileName))) {
-            return "not found";
+            return HttpStatus.NOT_FOUND.toString();
         }
 
         try (FileChannel fileChannel = FileChannel.open(Path.of(fileName), StandardOpenOption.READ)) {
